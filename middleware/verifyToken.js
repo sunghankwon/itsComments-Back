@@ -11,15 +11,24 @@ const verifyToken = async (req, res, next) => {
     const refreshToken = req.cookies.refreshToken;
 
     if (!accessToken || !refreshToken) {
-      return res.send({ result: "fail", message: "All tokens have expired." });
+      return res.send({ result: "fail", message: "The token does not exist." });
     }
 
-    const decodedData = await admin.auth().verifyIdToken(accessToken);
-    req.user = decodedData;
-
+    let decodedData;
+    try {
+      decodedData = await admin.auth().verifyIdToken(accessToken);
+    } catch (error) {
+      if (error.code === "auth/id-token-expired") {
+        const user = await admin.auth().verifyIdToken(refreshToken);
+        const newAccessToken = await user.getIdToken();
+        decodedData = await admin.auth().verifyIdToken(newAccessToken);
+      } else {
+        return res.send({ result: "fail", message: error.message });
+      }
+    }
     next();
   } catch (error) {
-    return res.status(401).json({ error: "Unauthorized - Invalid tokens" });
+    return res.send({ result: "fail", message: error.message });
   }
 };
 
