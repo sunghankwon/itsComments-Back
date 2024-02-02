@@ -15,6 +15,7 @@ const verifyToken = async (req, res, next) => {
     }
 
     let decodedData;
+
     try {
       decodedData = await admin.auth().verifyIdToken(accessToken);
     } catch (error) {
