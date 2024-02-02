@@ -14,6 +14,7 @@ router.post("/", async (req, res, next) => {
       User.create({
         email: userData.email,
         nickname: userData.displayName,
+        icon: userData.photoURL,
       });
     }
 
