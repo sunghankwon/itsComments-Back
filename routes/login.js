@@ -8,9 +8,6 @@ router.post("/", async (req, res) => {
   try {
     const userData = req.body.user;
 
-    res.cookie("accessToken", userData.stsTokenManager.accessToken);
-    res.cookie("refreshToken", userData.stsTokenManager.refreshToken);
-
     let user = await User.findOne({ email: userData.email });
 
     if (!user) {
