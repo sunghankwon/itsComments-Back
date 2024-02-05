@@ -1,4 +1,5 @@
 const admin = require("firebase-admin");
+
 const serviceAccount = require(process.env.GOOGLE_CREDENTIALS);
 
 admin.initializeApp({
@@ -11,7 +12,7 @@ const verifyToken = async (req, res, next) => {
     const refreshToken = req.cookies.refreshToken;
 
     if (!accessToken || !refreshToken) {
-      return res.send({ result: "fail", message: "The token does not exist." });
+      return res.status(400).json({ message: "The token does not exist." });
     }
 
     let decodedData;
@@ -24,12 +25,13 @@ const verifyToken = async (req, res, next) => {
         const newAccessToken = await user.getIdToken();
         decodedData = await admin.auth().verifyIdToken(newAccessToken);
       } else {
-        return res.send({ result: "fail", message: error.message });
+        return res.status(400).json({ message: error.message });
       }
     }
+
     next();
   } catch (error) {
-    return res.send({ result: "fail", message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
