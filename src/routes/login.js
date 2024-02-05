@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 
-const { User } = require("../Models/User");
+const { User } = require("../models/User");
 
 router.post("/", async (req, res) => {
   try {
@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
     if (!user) {
       user = await User.create({
         email: userData.email,
-        nickname: userData.displayName,
+        nickname: userData.displayName ? userData.displayName : "Unnamed",
         icon: userData.photoURL,
       });
     }
