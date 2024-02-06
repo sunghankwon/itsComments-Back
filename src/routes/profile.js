@@ -27,7 +27,7 @@ router.patch("/", async (req, res, next) => {
 
     res.status(200).json({ message: "Profile updated successfully", user });
   } catch (error) {
-    next(error);
+    res.status(400).json({ message: "Profile updated failed" });
   }
 });
 
