@@ -21,7 +21,10 @@ router.get("/", async function (req, res, next) {
       if (comment.postUrl === pageUrl) {
         if (
           comment.allowPublic === true ||
-          comment.publicUsers.find(loginUser)
+          comment.creator.email === loginUser.email ||
+          comment.publicUsers.find(
+            (user) => user.toString() === loginUser._id.toString(),
+          )
         ) {
           pageComments.push(comment);
         }
