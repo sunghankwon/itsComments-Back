@@ -8,6 +8,31 @@ const s3Uploader = require("../middleware/s3Uploader");
 const { sendMail } = require("../utiles/mailSender");
 const { checkMails } = require("../utiles/mailChecker");
 
+let clients = [];
+
+const sendUserDataToClients = (updateUserData, friendId) => {
+  const client = clients.find((client) => client.friendId === friendId);
+
+  if (client) {
+    client.write(`data: ${JSON.stringify(updateUserData)}\n\n`);
+  }
+};
+
+router.get("/comments-stream/:friendId", (req, res) => {
+  const { friendId } = req.params;
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.friendId = friendId;
+
+  clients.push(res);
+
+  req.on("close", () => {
+    clients = clients.filter((client) => client !== res);
+  });
+});
+
 router.post(
   "/new",
   s3Uploader.single("screenshot"),
@@ -101,6 +126,12 @@ router.post(
           taggedFriends.receivedComments.push(newComment._id);
 
           await taggedFriends.save();
+
+          const updateUserData = await User.findById(publicUser)
+            .populate("friends")
+            .populate({ path: "feedComments", populate: { path: "creator" } });
+
+          sendUserDataToClients(updateUserData, taggedFriends._id.toString());
         }
       }
 
