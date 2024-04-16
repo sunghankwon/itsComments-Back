@@ -44,7 +44,7 @@ router.post("/client", verifyToken, async (req, res, next) => {
         },
       })
       .populate({
-        path: "receivedComments",
+        path: "feedComments",
         populate: {
           path: "creator",
         },
