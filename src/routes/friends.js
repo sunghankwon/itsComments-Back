@@ -12,7 +12,6 @@ router.get("/", async function (req, res, next) {
   }
 
   const friends = user.friends;
-
   res.status(200).send({ friends });
 });
 
