@@ -5,8 +5,9 @@ const router = express.Router();
 const { User } = require("../models/User");
 const { Comment } = require("../models/Comment");
 const s3Uploader = require("../middleware/s3Uploader");
-const { sendMail } = require("../utiles/mailSender");
-const { checkMails } = require("../utiles/mailChecker");
+const { sendMail } = require("../utils/mailSender");
+const { checkMails } = require("../utils/mailChecker");
+const { deleteS3Object } = require("../utils/deleteS3Object");
 
 let clientsSSE = [];
 let commentsSSE = [];
@@ -366,6 +367,9 @@ router.delete("/:commentId", async (req, res, next) => {
     );
 
     await user.save();
+
+    const imageKey = comment.screenshot.split("/").pop();
+    await deleteS3Object(imageKey);
 
     for (const reComment of comment.reComments) {
       const writer = await User.findById(reComment.creator);
