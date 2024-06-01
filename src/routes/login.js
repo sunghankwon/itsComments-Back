@@ -21,7 +21,9 @@ router.post("/", async (req, res, next) => {
     if (!user) {
       user = await User.create({
         email: userData.email,
-        nickname: userData.displayName ? userData.displayName : "Unnamed",
+        nickname: userData.displayName
+          ? userData.displayName
+          : userData.email.split("@")[0],
         icon: userData.photoURL,
       });
     }
