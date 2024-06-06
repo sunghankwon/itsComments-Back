@@ -6,8 +6,8 @@ const cors = require("cors");
 
 async function expressLoader(app) {
   app.use(logger("dev"));
-  app.use(express.json({ limit: "10mb" }));
-  app.use(express.urlencoded({ limit: "10mb", extended: false }));
+  app.use(express.json({ limit: "20mb" }));
+  app.use(express.urlencoded({ limit: "20mb", extended: false }));
   app.use(cookieParser());
   app.use(express.static(path.join(__dirname, "public")));
   app.use((req, res, next) => {
