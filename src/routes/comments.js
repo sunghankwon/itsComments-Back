@@ -162,7 +162,7 @@ router.get("/:commentId", async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.receivedComments = user.receivedComments.filter(
+    user.feedComments = user.feedComments.filter(
       (comment) => comment.toString() !== commentId,
     );
 
@@ -306,6 +306,53 @@ router.delete("/recomments", async (req, res, next) => {
   }
 });
 
+router.patch("/:commentId", async (req, res, next) => {
+  try {
+    const commentId = req.params.commentId;
+    const { userId, changedComment } = req.body;
+    const comment = await Comment.findById(commentId);
+    console.log(req.body);
+    console.log(changedComment);
+
+    if (!comment) {
+      return res.status(404).json({ message: "No such comment was found." });
+    }
+
+    if (userId !== comment.creator.toString()) {
+      return res
+        .status(404)
+        .json({ message: "You do not have permission to delete." });
+    }
+
+    let user = await User.findById(userId)
+      .populate({
+        path: "createdComments",
+        populate: {
+          path: "creator",
+        },
+      })
+      .populate({
+        path: "receivedComments",
+        populate: {
+          path: "creator",
+        },
+      });
+
+    comment.text = changedComment;
+    await comment.save();
+    await user.save();
+    const allComments = {
+      createdComments: user.createdComments,
+      receivedComments: user.receivedComments,
+    };
+
+    res.status(200).json({ comment, allComments });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: "Failed to update a comment." });
+  }
+});
+
 router.delete("/:commentId", async (req, res, next) => {
   try {
     const commentId = req.params.commentId;
@@ -399,7 +446,7 @@ router.delete("/:commentId", async (req, res, next) => {
 
     const allComments = {
       createdComments: user.createdComments,
-      feedComments: user.feedComments,
+      receivedComments: user.receivedComments,
     };
 
     res
