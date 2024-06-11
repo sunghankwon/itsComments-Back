@@ -338,6 +338,13 @@ router.patch("/:commentId", async (req, res, next) => {
         },
       });
 
+    user.createdComments = user.createdComments.map((userComment) => {
+      if (userComment._id.toString() === commentId) {
+        userComment.text = changedComment;
+      }
+      return userComment;
+    });
+
     comment.text = changedComment;
     await comment.save();
     await user.save();
