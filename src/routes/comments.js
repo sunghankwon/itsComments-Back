@@ -324,6 +324,9 @@ router.patch("/:commentId", async (req, res, next) => {
         .json({ message: "You do not have permission to delete." });
     }
 
+    comment.text = changedComment;
+    await comment.save();
+
     let user = await User.findById(userId)
       .populate({
         path: "createdComments",
@@ -338,22 +341,10 @@ router.patch("/:commentId", async (req, res, next) => {
         },
       });
 
-    user.createdComments = user.createdComments.map((userComment) => {
-      if (userComment._id.toString() === commentId) {
-        userComment.text = changedComment;
-      }
-      return userComment;
-    });
-
-    comment.text = changedComment;
-    await comment.save();
     await user.save();
-    const allComments = {
-      createdComments: user.createdComments,
-      receivedComments: user.receivedComments,
-    };
+    const createdComments = user.createdComments;
 
-    res.status(200).json({ comment, allComments });
+    res.status(200).json({ comment, createdComments });
   } catch (error) {
     console.log(error);
     return res.status(400).json({ message: "Failed to update a comment." });
